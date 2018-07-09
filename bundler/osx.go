@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"io"
 	"log"
-	"fmt"
 )
 
 type Manifest struct {
@@ -36,8 +35,6 @@ func (o *osx) build(version *Version) {
 
 	log.Println("copying icon file")
 	o.icon(contents, version.Icon)
-
-	fmt.Println("build complete!")
 }
 
 func (o *osx) generate() {

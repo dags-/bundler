@@ -6,6 +6,8 @@ import (
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"encoding/json"
+	"time"
+	"fmt"
 )
 
 type Version struct {
@@ -21,12 +23,15 @@ type bundler interface {
 }
 
 func Build(os, arch string) error {
+	t := time.Now()
 	b, e := getBundler(os, arch)
 	if e != nil {
 		return e
 	}
 	v := loadVersion()
 	b.build(v)
+	d := time.Since(t)
+	fmt.Printf("build complete in %v seconds\n", d.Seconds())
 	return nil
 }
 
