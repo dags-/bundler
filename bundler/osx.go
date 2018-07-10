@@ -1,6 +1,7 @@
 package bundler
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -16,10 +17,9 @@ type Manifest struct {
 }
 
 type osx struct {
-	arch string
 }
 
-func (o *osx) build(version *Version) {
+func (o *osx) build(version *Version, arch string) {
 	buildDir := mustDir(version.BuildDir, "darwin")
 	contents := mustDir(buildDir, version.Name+".app", "Contents")
 
@@ -27,7 +27,7 @@ func (o *osx) build(version *Version) {
 	o.generate()
 
 	log.Println("running go build")
-	o.executable(contents, version.Name)
+	o.executable(version, "darwin", arch)
 
 	log.Println("writing Info.plist")
 	o.manifest(contents, version)
@@ -40,9 +40,11 @@ func (o *osx) generate() {
 	fatal(exec.Command("go", "generate").Run())
 }
 
-func (o *osx) executable(contentsDir, name string) {
-	execFile := filepath.Join(mustDir(contentsDir, "MacOS"), name)
-	fatal(exec.Command("go", "build", "-o", execFile).Run())
+func (o *osx) executable(version *Version, platform, arch string) {
+	name := fmt.Sprintf("%s-%s-%s.app", version.Name, version.Version, arch)
+	file := filepath.Join(version.BuildDir, platform, name, "Contents", "MacOS", version.Name)
+	target := fmt.Sprintf("--targets=%s/%s", platform, arch)
+	fatal(exec.Command("xgo", target, "-out", file).Run())
 }
 
 func (o *osx) manifest(contentsDir string, version *Version) {

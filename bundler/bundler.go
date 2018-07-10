@@ -14,11 +14,12 @@ import (
 )
 
 type Version struct {
-	Identifier string `json:"identifier"`
-	Name       string `json:"name"`
-	Version    string `json:"version"`
-	BuildDir   string `json:"build_dir"`
-	Icon       Icon   `json:"icon,omitempty"`
+	Identifier string              `json:"identifier"`
+	Name       string              `json:"name"`
+	Version    string              `json:"version"`
+	BuildDir   string              `json:"build_dir"`
+	Targets    map[string][]string `json:"targets"`
+	Icon       Icon                `json:"icon,omitempty"`
 }
 
 type Icon struct {
@@ -27,29 +28,41 @@ type Icon struct {
 	Windows string `json:"windows"`
 }
 
-type bundler interface {
-	build(v *Version)
+type Target struct {
+	OS string
 }
 
-func Build(os, arch string) error {
-	t := time.Now()
-	b, e := getBundler(os, arch)
-	if e != nil {
-		return e
-	}
+type bundler interface {
+	build(v *Version, arch string)
+}
+
+func Build() error {
+	start := time.Now()
 	v := loadVersion()
-	b.build(v)
-	d := time.Since(t)
-	fmt.Printf("build complete in %v seconds\n", d.Seconds())
+
+	for platform, arch := range v.Targets {
+		b, e := getBundler(platform)
+		if e != nil {
+			log.Println(e)
+			continue
+		}
+		t := time.Now()
+		b.build(v)
+		d := time.Since(t)
+		fmt.Printf("build complete: %s/%s (%.3f seconds)\n", platform, arch, d.Seconds())
+	}
+
+	dur := time.Since(start)
+	fmt.Printf("total build time: %.3f seconds\n", dur.Seconds())
 	return nil
 }
 
-func getBundler(os, arch string) (bundler, error) {
-	switch os {
+func getBundler(platform string) (bundler, error) {
+	switch platform {
 	case "darwin":
-		return &osx{arch: arch}, nil
+		return &osx{}, nil
 	case "windows":
-		return &windows{arch: arch}, nil
+		return &windows{}, nil
 	default:
 		return nil, errors.New("unsupported os")
 	}
