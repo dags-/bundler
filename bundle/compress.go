@@ -15,8 +15,11 @@ func compress(path, platform string) error {
 		return err
 	}
 
-	name := strings.TrimSuffix(path, filepath.Ext(path))
-	zipPath := fmt.Sprintf("%s-%s.zip", platform, name)
+	dir, name := filepath.Split(path)
+	name = strings.TrimSuffix(name, filepath.Ext(name))
+	name = fmt.Sprintf("%s-%s.zip", platform, name)
+	zipPath := filepath.Join(dir, name)
+
 	out, e := os.Create(zipPath)
 	if e != nil {
 		panic(e)
