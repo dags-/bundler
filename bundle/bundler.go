@@ -38,17 +38,14 @@ func Bundle(build *Build, platform *Platform, name string, arch string) (time.Du
 	}
 
 	start := time.Now()
-	name = toNormal(name)
-	arch = toNormal(arch)
-
 	log.Println("writing manifest...")
-	e = b.WriteManifest(build, platform, arch)
+	e = b.WriteManifest(build, platform, toNormal(arch))
 	if e != nil {
 		return time.Duration(0), e
 	}
 
 	log.Println("writing icon...")
-	e = b.WriteIcon(build, platform, arch)
+	e = b.WriteIcon(build, platform, toNormal(arch))
 	if e != nil {
 		log.Println(e)
 	}
@@ -65,7 +62,8 @@ func Bundle(build *Build, platform *Platform, name string, arch string) (time.Du
 	}
 
 	if platform.Compress {
-		e = compress(b.Artifact(build, platform, arch), name)
+		log.Println("compressing executable")
+		e = compress(b.Artifact(build, platform, toNormal(arch)), toNormal(name))
 	}
 
 	return time.Since(start), e
@@ -86,11 +84,8 @@ func compile(b Builder, build *Build, platform *Platform, name, arch string) err
 		return errors.New("invalid arch")
 	}
 
-	name = toInternal(name)
-	arch = toInternal(arch)
-
 	buildId := fmt.Sprint(time.Now().Unix())
-	target := fmt.Sprintf("--targets=%s/%s", name, arch)
+	target := fmt.Sprintf("--targets=%s/%s", toInternal(name), toInternal(arch))
 	flags := flags(platform)
 	args := []string{target, "-out", buildId}
 	if len(flags) > 0 {
@@ -104,7 +99,7 @@ func compile(b Builder, build *Build, platform *Platform, name, arch string) err
 
 	for _, f := range files {
 		if !f.IsDir() && strings.HasPrefix(f.Name(), buildId) {
-			return moveFile(f.Name(), b.ExecPath(build, platform, arch))
+			return moveFile(f.Name(), b.ExecPath(build, platform, toNormal(arch)))
 		}
 	}
 

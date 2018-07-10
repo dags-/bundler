@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/josephspurrier/goversioninfo"
 )
 
 type windows struct{}
@@ -30,15 +28,15 @@ func (w *windows) WriteIcon(b *Build, p *Platform, arch string) error {
 func (w *windows) WriteManifest(b *Build, p *Platform, arch string) error {
 	version := ver(b.Version)
 
-	manifest := &goversioninfo.VersionInfo{
-		FixedFileInfo: goversioninfo.FixedFileInfo{
-			FileVersion: goversioninfo.FileVersion{
+	manifest := &VersionInfo{
+		FixedFileInfo: FixedVersionInfo{
+			FileVersion: Version{
 				Major: version[0],
 				Minor: version[1],
 				Patch: version[2],
 				Build: version[3],
 			},
-			ProductVersion: goversioninfo.FileVersion{
+			ProductVersion: Version{
 				Major: version[0],
 				Minor: version[1],
 				Patch: version[2],
@@ -50,14 +48,14 @@ func (w *windows) WriteManifest(b *Build, p *Platform, arch string) error {
 			FileType:      "01",
 			FileSubType:   "00",
 		},
-		StringFileInfo: goversioninfo.StringFileInfo{
+		StringFileInfo: StringFileInfo{
 			ProductName:    b.Name,
 			ProductVersion: b.Version,
 		},
-		VarFileInfo: goversioninfo.VarFileInfo{
-			Translation: goversioninfo.Translation{
-				LangID:    goversioninfo.LngUKEnglish,
-				CharsetID: goversioninfo.CsUnicode,
+		VarFileInfo: VarFileInfo{
+			Translation: Translation{
+				LangID:    "0409",
+				CharsetID: "04B0",
 			},
 		},
 		IconPath:     p.Icon,
@@ -94,4 +92,53 @@ func ver(s string) []int {
 		ver[i] = val
 	}
 	return ver
+}
+
+type VersionInfo struct {
+	FixedFileInfo  FixedVersionInfo
+	StringFileInfo StringFileInfo
+	VarFileInfo    VarFileInfo
+	IconPath       string
+	ManifestPath   string
+}
+
+type FixedVersionInfo struct {
+	FileVersion    Version
+	ProductVersion Version
+	FileFlagsMask  string
+	FileFlags      string
+	FileOS         string
+	FileType       string
+	FileSubType    string
+}
+
+type StringFileInfo struct {
+	Comments         string
+	CompanyName      string
+	FileDescription  string
+	FileVersion      string
+	InternalName     string
+	LegalCopyright   string
+	LegalTrademarks  string
+	OriginalFilename string
+	PrivateBuild     string
+	ProductName      string
+	ProductVersion   string
+	SpecialBuild     string
+}
+
+type VarFileInfo struct {
+	Translation Translation
+}
+
+type Translation struct {
+	LangID    string
+	CharsetID string
+}
+
+type Version struct {
+	Major int
+	Minor int
+	Patch int
+	Build int
 }
