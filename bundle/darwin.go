@@ -22,12 +22,12 @@ func (d *darwin) Artifact(b *Build, p *Platform, arch string) string {
 }
 
 func (d *darwin) ExecPath(b *Build, p *Platform, arch string) string {
-	return filepath.Join(d.Artifact(b, p, arch), "Content", "MacOS", b.Name)
+	return filepath.Join(d.Artifact(b, p, arch), "Contents", "MacOS", b.Name)
 }
 
 func (d *darwin) WriteManifest(b *Build, p *Platform, arch string) error {
 	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
-	path := filepath.Join(b.Output, "darwin", name, "Content", "Info.plist")
+	path := filepath.Join(b.Output, "darwin", name, "Contents", "Info.plist")
 	mustFile(path)
 	f, e := os.Create(path)
 	if e != nil {
@@ -46,7 +46,7 @@ func (d *darwin) WriteManifest(b *Build, p *Platform, arch string) error {
 func (d *darwin) WriteIcon(b *Build, p *Platform, arch string) error {
 	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
 	_, icon := filepath.Split(p.Icon)
-	path := filepath.Join(b.Output, "darwin", name, "Content", "Resources", icon)
+	path := filepath.Join(b.Output, "darwin", name, "Contents", "Resources", icon)
 	return copyFile(p.Icon, path)
 }
 
