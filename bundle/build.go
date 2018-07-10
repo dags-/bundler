@@ -17,7 +17,7 @@ type Build struct {
 type Platform struct {
 	Icon     string   `json:"icon"`
 	Arch     []string `json:"arch"`
-	Generate []string `json:"pre"`
+	Generate []string `json:"generate"`
 	Flags    []string `json:"flags"`
 	Compress bool     `json:"Compress"`
 }
