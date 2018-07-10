@@ -18,7 +18,7 @@ type darwin struct{}
 
 func (d *darwin) ExecPath(b *Build, p *Platform, arch string) string {
 	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
-	return filepath.Join(b.Output, "darwin", name, "Content", "MacOS")
+	return filepath.Join(b.Output, "darwin", name, "Content", "MacOS", b.Name)
 }
 
 func (d *darwin) WriteManifest(b *Build, p *Platform, arch string) error {
