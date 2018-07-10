@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/dags-/bundler/bundler"
 	"flag"
 	"runtime"
+
+	"github.com/dags-/bundler/bundler"
 )
 
 func main() {

@@ -1,21 +1,30 @@
 package bundler
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
-	"github.com/pkg/errors"
-	"io/ioutil"
-	"encoding/json"
 	"time"
-	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 type Version struct {
 	Identifier string `json:"identifier"`
 	Name       string `json:"name"`
 	Version    string `json:"version"`
-	Icon       string `json:"icon"`
 	BuildDir   string `json:"build_dir"`
+	Icon       Icon   `json:"icon,omitempty"`
+}
+
+type Icon struct {
+	Linux   string `json:"linux"`
+	MacOS   string `json:"darwin"`
+	Windows string `json:"windows"`
 }
 
 type bundler interface {
@@ -38,9 +47,9 @@ func Build(os, arch string) error {
 func getBundler(os, arch string) (bundler, error) {
 	switch os {
 	case "darwin":
-		return &osx{arch:arch}, nil
+		return &osx{arch: arch}, nil
 	case "windows":
-		return &windows{arch:arch}, nil
+		return &windows{arch: arch}, nil
 	default:
 		return nil, errors.New("unsupported os")
 	}
@@ -69,4 +78,26 @@ func mustDir(path ...string) string {
 	e := os.MkdirAll(dir, os.ModePerm)
 	fatal(e)
 	return dir
+}
+
+func copyFile(from, to string) {
+	in, e := os.Open(from)
+	if e != nil {
+		log.Println(e)
+		return
+	}
+	defer in.Close()
+
+	out, e := os.Create(to)
+	if e != nil {
+		log.Println(e)
+		return
+	}
+	defer out.Close()
+
+	_, e = io.Copy(out, in)
+	if e != nil {
+		log.Println(e)
+		return
+	}
 }

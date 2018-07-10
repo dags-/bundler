@@ -1,12 +1,11 @@
 package bundler
 
 import (
-	"text/template"
-	"os"
-	"path/filepath"
-	"os/exec"
-	"io"
 	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"text/template"
 )
 
 type Manifest struct {
@@ -34,7 +33,7 @@ func (o *osx) build(version *Version) {
 	o.manifest(contents, version)
 
 	log.Println("copying icon file")
-	o.icon(contents, version.Icon)
+	o.icon(contents, version.Icon.MacOS)
 }
 
 func (o *osx) generate() {
@@ -52,38 +51,24 @@ func (o *osx) manifest(contentsDir string, version *Version) {
 	fatal(e)
 	defer info.Close()
 
-	_, iconName := filepath.Split(version.Icon)
+	_, iconName := filepath.Split(version.Icon.MacOS)
 	t := template.Must(template.New("info").Parse(templ))
 	fatal(t.Execute(info, &Manifest{
 		Executable: version.Name,
-		Version: version.Version,
-		Icon: iconName,
+		Version:    version.Version,
+		Icon:       iconName,
 		Identifier: version.Identifier,
 	}))
 }
 
 func (o *osx) icon(contentsDir, icon string) {
-	from, e := os.Open(icon)
-	if e != nil {
-		log.Println(e)
+	if icon == "" {
 		return
 	}
-	defer from.Close()
 
 	_, iconName := filepath.Split(icon)
 	path := filepath.Join(mustDir(contentsDir, "Resources"), iconName)
-	to, e := os.Create(path)
-	if e != nil {
-		log.Println(e)
-		return
-	}
-	defer to.Close()
-
-	_, e = io.Copy(to, from)
-	if e != nil {
-		log.Println(e)
-		return
-	}
+	copyFile(icon, path)
 }
 
 const templ = `<?xml version="1.0" encoding="UTF-8"?>
