@@ -21,7 +21,7 @@ func main() {
 		for _, arch := range plat.Arch {
 			t, e := bundle.Bundle(b, plat, name, arch)
 			if e != nil {
-				log.Println(e)
+				log.Println(" build error:", e)
 				continue
 			}
 			log.Printf(" build complete: %s/%s (%.3f seconds)\n", name, arch, t.Seconds())
