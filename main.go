@@ -28,5 +28,5 @@ func main() {
 		}
 	}
 
-	log.Printf("build(s) complete in %.3f seconds\n", time.Since(start).Seconds())
+	log.Printf("Build(s) complete in %.3f seconds\n", time.Since(start).Seconds())
 }
