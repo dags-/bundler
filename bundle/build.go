@@ -19,6 +19,7 @@ type Platform struct {
 	Arch     []string `json:"arch"`
 	Generate []string `json:"pre"`
 	Flags    []string `json:"flags"`
+	Compress bool     `json:"zip_artifacts"`
 }
 
 func LoadBuildFile() *Build {

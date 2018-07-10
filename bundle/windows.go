@@ -14,9 +14,13 @@ import (
 
 type windows struct{}
 
-func (w *windows) ExecPath(b *Build, p *Platform, arch string) string {
+func (w *windows) Artifact(b *Build, p *Platform, arch string) string {
 	name := fmt.Sprintf("%s-%s-%s.exe", b.Name, b.Version, arch)
 	return filepath.Join(b.Output, "windows", name)
+}
+
+func (w *windows) ExecPath(b *Build, p *Platform, arch string) string {
+	return w.Artifact(b, p, arch)
 }
 
 func (w *windows) WriteIcon(b *Build, p *Platform, arch string) error {

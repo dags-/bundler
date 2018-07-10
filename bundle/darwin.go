@@ -16,9 +16,13 @@ type InfoPlist struct {
 
 type darwin struct{}
 
-func (d *darwin) ExecPath(b *Build, p *Platform, arch string) string {
+func (d *darwin) Artifact(b *Build, p *Platform, arch string) string {
 	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
-	return filepath.Join(b.Output, "darwin", name, "Content", "MacOS", b.Name)
+	return filepath.Join(b.Output, "darwin", name)
+}
+
+func (d *darwin) ExecPath(b *Build, p *Platform, arch string) string {
+	return filepath.Join(d.Artifact(b, p, arch), "Content", "MacOS", b.Name)
 }
 
 func (d *darwin) WriteManifest(b *Build, p *Platform, arch string) error {

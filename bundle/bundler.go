@@ -12,6 +12,8 @@ import (
 )
 
 type Builder interface {
+	Artifact(build *Build, platform *Platform, arch string) string
+
 	ExecPath(build *Build, platform *Platform, arch string) string
 
 	WriteManifest(build *Build, platform *Platform, arch string) error
@@ -27,12 +29,17 @@ func Setup(build *Build) {
 }
 
 func Bundle(build *Build, platform *Platform, name string, arch string) (time.Duration, error) {
-	start := time.Now()
+	name = toInternal(name)
+	arch = toInternal(arch)
 
 	b, e := builder(name)
 	if e != nil {
 		return time.Duration(0), e
 	}
+
+	start := time.Now()
+	name = toNormal(name)
+	arch = toNormal(arch)
 
 	log.Println("writing manifest...")
 	e = b.WriteManifest(build, platform, arch)
@@ -57,7 +64,11 @@ func Bundle(build *Build, platform *Platform, name string, arch string) (time.Du
 		return time.Duration(0), e
 	}
 
-	return time.Since(start), nil
+	if platform.Compress {
+		e = compress(b.Artifact(build, platform, arch), name)
+	}
+
+	return time.Since(start), e
 }
 
 func builder(platform string) (Builder, error) {
