@@ -2,10 +2,9 @@ package bundle
 
 import (
 	"fmt"
-	"html/template"
 	"os"
-	"os/exec"
 	"path/filepath"
+	"text/template"
 )
 
 type InfoPlist struct {
@@ -15,41 +14,36 @@ type InfoPlist struct {
 	Identifier string
 }
 
-type darwin struct {
+type darwin struct{}
+
+func (d *darwin) ExecPath(b *Build, p *Platform, arch string) string {
+	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
+	return filepath.Join(b.Output, "darwin", name, "Content", "MacOS")
 }
 
-func (d *darwin) Generate() error {
-	return exec.Command("go", "generate").Run()
-}
-
-func (d *darwin) ExecPath(v *Version, arch string) string {
-	name := fmt.Sprintf("%s-%s-%s.App", v.Name, v.Version, arch)
-	return filepath.Join(v.BuildDir, "darwin", name, "Content", "MacOS")
-}
-
-func (d *darwin) WriteManifest(v *Version, arch string) error {
-	name := fmt.Sprintf("%s-%s-%s.app", v.Name, v.Version, arch)
-	path := filepath.Join(v.BuildDir, "darwin", name, "Content", "Info.plist")
+func (d *darwin) WriteManifest(b *Build, p *Platform, arch string) error {
+	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
+	path := filepath.Join(b.Output, "darwin", name, "Content", "Info.plist")
 	mustFile(path)
 	f, e := os.Create(path)
 	if e != nil {
 		return e
 	}
 	defer f.Close()
-	_, icon := filepath.Split(v.Icon.MacOS)
+	_, icon := filepath.Split(p.Icon)
 	return template.Must(template.New("info").Parse(infoPlist)).Execute(f, &InfoPlist{
-		Executable: v.Name,
-		Version:    v.Version,
+		Executable: b.Name,
+		Version:    b.Version,
 		Icon:       icon,
-		Identifier: v.Identifier,
+		Identifier: b.Identifier,
 	})
 }
 
-func (d *darwin) WriteIcon(v *Version, arch string) error {
-	name := fmt.Sprintf("%s-%s-%s.app", v.Name, v.Version, arch)
-	_, icon := filepath.Split(v.Icon.MacOS)
-	path := filepath.Join(v.BuildDir, "darwin", name, "Content", "Resources", icon)
-	return copyFile(v.Icon.MacOS, path)
+func (d *darwin) WriteIcon(b *Build, p *Platform, arch string) error {
+	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
+	_, icon := filepath.Split(p.Icon)
+	path := filepath.Join(b.Output, "darwin", name, "Content", "Resources", icon)
+	return copyFile(p.Icon, path)
 }
 
 const infoPlist = `<?xml version="1.0" encoding="UTF-8"?>

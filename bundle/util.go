@@ -3,8 +3,17 @@ package bundle
 import (
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 )
+
+func cmd(cmd string) error {
+	parts := strings.Split(cmd, " ")
+	name := parts[0]
+	args := parts[1:]
+	return exec.Command(name, args).Run()
+}
 
 func fatal(e error) {
 	if e != nil {
