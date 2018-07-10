@@ -62,7 +62,7 @@ func Bundle(build *Build, platform *Platform, name string, arch string) (time.Du
 func builder(platform string) (Builder, error) {
 	switch platform {
 	case "darwin":
-		return nil, nil
+		return &darwin{}, nil
 	case "linux":
 
 	case "windows":
