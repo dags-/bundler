@@ -63,7 +63,7 @@ func Bundle(build *Build, platform *Platform, name string, arch string) (time.Du
 
 	if platform.Compress {
 		log.Println("compressing executable")
-		e = compress(b.Artifact(build, platform, toNormal(arch)), toNormal(name))
+		e = Compress(b.Artifact(build, platform, toNormal(arch)), toNormal(name))
 	}
 
 	return time.Since(start), e

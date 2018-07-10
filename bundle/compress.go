@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func compress(path, platform string) error {
+func Compress(path, platform string) error {
 	file, err := os.Stat(path)
 	if err != nil {
 		return err
@@ -30,28 +30,28 @@ func compress(path, platform string) error {
 	defer wr.Close()
 	if file.IsDir() {
 		return filepath.Walk(path, func(path string, file os.FileInfo, err error) error {
-			return writeToZip(wr, file)
+			return writeToZip(wr, path, path, file)
 		})
 	} else {
-		return writeToZip(wr, file)
+		return writeToZip(wr, path, file.Name(), file)
 	}
 }
 
-func writeToZip(wr *zip.Writer, file os.FileInfo) error {
+func writeToZip(wr *zip.Writer, from string, to string, file os.FileInfo) error {
 	if file.IsDir() {
 		return nil
 	}
 
-	w, e := wr.Create(file.Name())
-	if e != nil {
-		return e
-	}
-
-	in, e := os.Open(file.Name())
+	in, e := os.Open(from)
 	if e != nil {
 		return e
 	}
 	defer in.Close()
+
+	w, e := wr.Create(to)
+	if e != nil {
+		return e
+	}
 
 	_, e = io.Copy(w, in)
 	return e
