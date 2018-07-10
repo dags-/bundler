@@ -51,7 +51,7 @@ func Bundle(build *Build, platform *Platform, name string, arch string) (time.Du
 	}
 
 	log.Println("compiling executable...")
-	e = compile(b, build, platform, arch)
+	e = compile(b, build, platform, name, arch)
 	if e != nil {
 		return time.Duration(0), e
 	}
@@ -71,16 +71,14 @@ func builder(platform string) (Builder, error) {
 	return nil, errors.New("platform not supported")
 }
 
-func compile(b Builder, build *Build, platform *Platform, arch string) error {
+func compile(b Builder, build *Build, platform *Platform, name, arch string) error {
 	if arch == "" {
 		return errors.New("invalid arch")
 	}
 
 	buildId := fmt.Sprint(time.Now().Unix())
-	targets := fmt.Sprintf("--targets=%s/%s", platform, arch)
-
+	targets := fmt.Sprintf("--targets=%s/%s", name, arch)
 	fatal(exec.Command("xgo", targets, "-out", buildId, ".").Run())
-
 	files, e := ioutil.ReadDir(".")
 	fatal(e)
 
