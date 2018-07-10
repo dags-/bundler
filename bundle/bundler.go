@@ -28,6 +28,13 @@ func Setup(build *Build) {
 	}
 }
 
+func Generate(platform *Platform) {
+	log.Println("executing generate commands...")
+	for _, c := range platform.Generate {
+		cmd(c)
+	}
+}
+
 func Bundle(build *Build, platform *Platform, name string, arch string) (time.Duration, error) {
 	name = toInternal(name)
 	arch = toInternal(arch)

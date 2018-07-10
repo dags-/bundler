@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -12,11 +11,13 @@ func main() {
 	start := time.Now()
 	b := bundle.LoadBuildFile()
 
+	log.Println("setting up")
 	bundle.Setup(b)
 
+	log.Println("running build tasks")
 	for name, plat := range b.Platforms {
+		bundle.Generate(plat)
 		for _, arch := range plat.Arch {
-			fmt.Printf("building for: %s/%s\n", name, arch)
 			t, e := bundle.Bundle(b, plat, name, arch)
 			if e != nil {
 				log.Println(e)
