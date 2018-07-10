@@ -37,7 +37,7 @@ func (d *darwin) WriteManifest(v *Version, arch string) error {
 	}
 	defer f.Close()
 	_, icon := filepath.Split(v.Icon.MacOS)
-	template.Must(template.New("info").Parse(infoPlist)).Execute(f, &InfoPlist{
+	return template.Must(template.New("info").Parse(infoPlist)).Execute(f, &InfoPlist{
 		Executable: v.Name,
 		Version:    v.Version,
 		Icon:       icon,

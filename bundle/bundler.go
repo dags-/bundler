@@ -38,7 +38,7 @@ func Build(platform, arch string, v *Version) (time.Duration, error) {
 	log.Println("writing icon...")
 	e = b.WriteIcon(v, arch)
 	if e != nil {
-		return time.Duration(0), e
+		log.Println(e)
 	}
 
 	log.Println("performing go:generate")
