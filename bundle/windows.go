@@ -3,6 +3,7 @@ package bundle
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -60,9 +61,11 @@ func (w *windows) WriteManifest(b *Build, p *Platform, arch string) error {
 	}
 
 	f, e := os.Open("versioninfo.json")
-	if e == os.ErrNotExist {
+	if e != nil {
+		log.Println(e)
 		f, e = os.Create("versioninfo.json")
 		if e != nil {
+			log.Println(e)
 			return e
 		}
 	}
