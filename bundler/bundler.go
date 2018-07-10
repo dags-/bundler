@@ -46,10 +46,12 @@ func Build() error {
 			log.Println(e)
 			continue
 		}
-		t := time.Now()
-		b.build(v)
-		d := time.Since(t)
-		fmt.Printf("build complete: %s/%s (%.3f seconds)\n", platform, arch, d.Seconds())
+		for _, a := range arch {
+			t := time.Now()
+			b.build(v, a)
+			d := time.Since(t)
+			fmt.Printf("build complete: %s/%s (%.3f seconds)\n", platform, arch, d.Seconds())
+		}
 	}
 
 	dur := time.Since(start)
