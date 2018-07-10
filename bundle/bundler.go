@@ -78,8 +78,13 @@ func compile(b Builder, build *Build, platform *Platform, name, arch string) err
 	buildId := fmt.Sprint(time.Now().Unix())
 	target := fmt.Sprintf("--targets=%s/%s", name, arch)
 	flags := flags(platform)
+	args := []string{target, "-out", buildId}
+	if len(flags) > 0 {
+		args = append(args, flags)
+	}
+	args = append(args, ".")
 
-	fatal(exec.Command("xgo", target, flags, "-out", buildId, ".").Run())
+	fatal(exec.Command("xgo", args...).Run())
 	files, e := ioutil.ReadDir(".")
 	fatal(e)
 
@@ -95,18 +100,16 @@ func compile(b Builder, build *Build, platform *Platform, name, arch string) err
 func flags(p *Platform) string {
 	if len(p.Flags) > 0 {
 		b := bytes.Buffer{}
-		b.WriteString("'")
 		for i, s := range p.Flags {
 			if i > 0 {
 				b.WriteString(" ")
 			}
 			b.WriteString(s)
 		}
-		b.WriteString("'")
 
 		flags := b.String()
-		if len(flags) > 2 {
-			return "-ldflags=" + flags
+		if len(flags) > 0 {
+			return "-ldflags='" + flags + "'"
 		}
 	}
 	return ""
