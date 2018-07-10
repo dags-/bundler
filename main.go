@@ -11,10 +11,10 @@ func main() {
 	start := time.Now()
 	b := bundle.LoadBuildFile()
 
-	log.Println("setting up")
+	log.Println("Setting up")
 	bundle.Setup(b)
 
-	log.Println("running build tasks")
+	log.Println("Running builds")
 	for name, plat := range b.Platforms {
 		log.Printf("Platform: %s\n", name)
 		bundle.Generate(plat)
