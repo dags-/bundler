@@ -1,6 +1,7 @@
 package bundle
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -63,10 +64,8 @@ func builder(platform string) (Builder, error) {
 	switch platform {
 	case "darwin":
 		return &darwin{}, nil
-	case "linux":
-
 	case "windows":
-
+		return &windows{}, nil
 	}
 	return nil, errors.New("platform not supported")
 }
@@ -77,8 +76,10 @@ func compile(b Builder, build *Build, platform *Platform, name, arch string) err
 	}
 
 	buildId := fmt.Sprint(time.Now().Unix())
-	targets := fmt.Sprintf("--targets=%s/%s", name, arch)
-	fatal(exec.Command("xgo", targets, "-out", buildId, ".").Run())
+	target := fmt.Sprintf("--targets=%s/%s", name, arch)
+	flags := flags(platform)
+
+	fatal(exec.Command("xgo", target, flags, "-out", buildId, ".").Run())
 	files, e := ioutil.ReadDir(".")
 	fatal(e)
 
@@ -89,4 +90,24 @@ func compile(b Builder, build *Build, platform *Platform, name, arch string) err
 	}
 
 	return errors.New("executable not found")
+}
+
+func flags(p *Platform) string {
+	if len(p.Flags) > 0 {
+		b := bytes.Buffer{}
+		b.WriteString("'")
+		for i, s := range p.Flags {
+			if i > 0 {
+				b.WriteString(" ")
+			}
+			b.WriteString(s)
+		}
+		b.WriteString("'")
+
+		flags := b.String()
+		if len(flags) > 2 {
+			return "-ldflags=" + flags
+		}
+	}
+	return ""
 }
