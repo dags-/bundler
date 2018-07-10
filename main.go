@@ -16,6 +16,7 @@ func main() {
 
 	log.Println("running build tasks")
 	for name, plat := range b.Platforms {
+		log.Printf("Platform: %s\n", name)
 		bundle.Generate(plat)
 		for _, arch := range plat.Arch {
 			t, e := bundle.Bundle(b, plat, name, arch)
@@ -23,7 +24,7 @@ func main() {
 				log.Println(e)
 				continue
 			}
-			log.Printf("build complete: %s/%s (%.3f seconds)\n", name, arch, t.Seconds())
+			log.Printf(" build complete: %s/%s (%.3f seconds)\n", name, arch, t.Seconds())
 		}
 	}
 

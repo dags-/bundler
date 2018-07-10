@@ -22,14 +22,14 @@ type Builder interface {
 }
 
 func Setup(build *Build) {
-	log.Println("executing setup commands...")
+	log.Println(" executing setup commands...")
 	for _, c := range build.Setup {
 		cmd(c)
 	}
 }
 
 func Generate(platform *Platform) {
-	log.Println("executing generate commands...")
+	log.Println(" executing generate commands...")
 	for _, c := range platform.Generate {
 		cmd(c)
 	}
@@ -45,31 +45,26 @@ func Bundle(build *Build, platform *Platform, name string, arch string) (time.Du
 	}
 
 	start := time.Now()
-	log.Println("writing manifest...")
+	log.Println(" writing manifest...")
 	e = b.WriteManifest(build, platform, toNormal(arch))
 	if e != nil {
 		return time.Duration(0), e
 	}
 
-	log.Println("writing icon...")
+	log.Println(" writing icon...")
 	e = b.WriteIcon(build, platform, toNormal(arch))
 	if e != nil {
 		log.Println(e)
 	}
 
-	log.Println("executing pre build commands...")
-	for _, cmd := range platform.Generate {
-		exec.Command(cmd).Run()
-	}
-
-	log.Println("compiling executable...")
+	log.Println(" compiling executable...")
 	e = compile(b, build, platform, name, arch)
 	if e != nil {
 		return time.Duration(0), e
 	}
 
 	if platform.Compress {
-		log.Println("compressing executable")
+		log.Println(" compressing executable")
 		e = Compress(b.Artifact(build, platform, toNormal(arch)), toNormal(name))
 	}
 
