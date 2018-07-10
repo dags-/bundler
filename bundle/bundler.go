@@ -86,6 +86,9 @@ func compile(b Builder, build *Build, platform *Platform, name, arch string) err
 		return errors.New("invalid arch")
 	}
 
+	name = toInternal(name)
+	arch = toInternal(arch)
+
 	buildId := fmt.Sprint(time.Now().Unix())
 	target := fmt.Sprintf("--targets=%s/%s", name, arch)
 	flags := flags(platform)
