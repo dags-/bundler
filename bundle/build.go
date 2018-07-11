@@ -5,25 +5,24 @@ import (
 	"io/ioutil"
 )
 
-type Build struct {
-	Name       string               `json:"name"`
-	Version    string               `json:"version"`
-	Identifier string               `json:"identifier"`
-	Output     string               `json:"output"`
-	Setup      []string             `json:"setup"`
-	Platforms  map[string]*Platform `json:"platforms"`
+type BuildScript struct {
+	Name       string            `json:"name"`
+	Version    string            `json:"version"`
+	Identifier string            `json:"identifier"`
+	Output     string            `json:"output"`
+	Setup      []string          `json:"setup"`
+	Targets    map[string]*Build `json:"targets"`
 }
 
-type Platform struct {
+type Build struct {
 	Icon     string   `json:"icon"`
-	Arch     []string `json:"arch"`
+	Compress bool     `json:"compress"`
 	Generate []string `json:"generate"`
 	Flags    []string `json:"flags"`
-	Compress bool     `json:"Compress"`
 }
 
-func LoadBuildFile() *Build {
-	var build Build
+func LoadBuildFile() *BuildScript {
+	var build BuildScript
 
 	d, e := ioutil.ReadFile("build.json")
 	fatal(e)

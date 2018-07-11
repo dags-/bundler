@@ -16,17 +16,17 @@ type InfoPlist struct {
 
 type darwin struct{}
 
-func (d *darwin) Artifact(b *Build, p *Platform, arch string) string {
-	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
+func (d *darwin) Artifact(b *BuildScript, p *Build, arch string) string {
+	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, toNormal(arch))
 	return filepath.Join(b.Output, "darwin", name)
 }
 
-func (d *darwin) ExecPath(b *Build, p *Platform, arch string) string {
-	return filepath.Join(d.Artifact(b, p, arch), "Content", "MacOS", b.Name)
+func (d *darwin) ExecPath(b *BuildScript, p *Build, arch string) string {
+	return filepath.Join(d.Artifact(b, p, toNormal(arch)), "Content", "MacOS", b.Name)
 }
 
-func (d *darwin) WriteManifest(b *Build, p *Platform, arch string) error {
-	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
+func (d *darwin) WriteManifest(b *BuildScript, p *Build, arch string) error {
+	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, toNormal(arch))
 	path := filepath.Join(b.Output, "darwin", name, "Content", "Info.plist")
 	mustFile(path)
 	f, e := os.Create(path)
@@ -43,8 +43,8 @@ func (d *darwin) WriteManifest(b *Build, p *Platform, arch string) error {
 	})
 }
 
-func (d *darwin) WriteIcon(b *Build, p *Platform, arch string) error {
-	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, arch)
+func (d *darwin) WriteIcon(b *BuildScript, p *Build, arch string) error {
+	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, toNormal(arch))
 	_, icon := filepath.Split(p.Icon)
 	path := filepath.Join(b.Output, "darwin", name, "Content", "Resources", icon)
 	return copyFile(p.Icon, path)

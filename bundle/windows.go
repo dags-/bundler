@@ -11,20 +11,20 @@ import (
 
 type windows struct{}
 
-func (w *windows) Artifact(b *Build, p *Platform, arch string) string {
-	name := fmt.Sprintf("%s-%s-%s.exe", b.Name, b.Version, arch)
+func (w *windows) Artifact(b *BuildScript, p *Build, arch string) string {
+	name := fmt.Sprintf("%s-%s-%s.exe", b.Name, b.Version, toNormal(arch))
 	return filepath.Join(b.Output, "windows", name)
 }
 
-func (w *windows) ExecPath(b *Build, p *Platform, arch string) string {
+func (w *windows) ExecPath(b *BuildScript, p *Build, arch string) string {
 	return w.Artifact(b, p, arch)
 }
 
-func (w *windows) WriteIcon(b *Build, p *Platform, arch string) error {
+func (w *windows) WriteIcon(b *BuildScript, p *Build, arch string) error {
 	return nil
 }
 
-func (w *windows) WriteManifest(b *Build, p *Platform, arch string) error {
+func (w *windows) WriteManifest(b *BuildScript, p *Build, arch string) error {
 	version := ver(b.Version)
 
 	manifest := &VersionInfo{
