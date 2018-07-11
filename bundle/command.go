@@ -22,7 +22,7 @@ func compileCmd(b *Build, buildId, target string) (cmd string, args []string) {
 
 func addArg(a []string, name string, val ...string) []string {
 	value := strings.Join(val, " ")
-	if len(val) > 0 {
+	if len(val) > 1 {
 		value = "'" + value + "'"
 	}
 	if value != "" {
