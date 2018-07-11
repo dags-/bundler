@@ -92,7 +92,9 @@ func compile(b Builder, script *BuildScript, build *Build, platform, arch string
 	// todo: remove
 	log.Printf(" (debug) command: %s %s\n", cmd, strings.Join(args, " "))
 
-	fatal(exec.Command(cmd, args...).Run())
+	e := exec.Command(cmd, args...).Run()
+	fatal(e)
+
 	files, e := ioutil.ReadDir(".")
 	fatal(e)
 
