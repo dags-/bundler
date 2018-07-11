@@ -1,7 +1,6 @@
 package bundle
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -82,23 +81,18 @@ func builder(platform string) (Builder, error) {
 }
 
 func compile(b Builder, script *BuildScript, build *Build, platform, arch string) error {
-	if arch == "" {
-		return errors.New("invalid arch")
+	if platform == "" || arch == "" {
+		return errors.New("invalid target")
 	}
 
 	buildId := fmt.Sprint(time.Now().Unix())
-	targets := fmt.Sprintf("--targets=%s/%s", platform, arch)
-	flags := flags(build)
-	args := []string{targets, "-out", buildId}
-	if len(flags) > 0 {
-		args = append(args, flags)
-	}
-	args = append(args, ".")
+	target := fmt.Sprint(platform, "/", arch)
+	cmd, args := compileCmd(build, buildId, target)
 
 	// todo: remove
-	log.Println("  (debug) compile command: xgo", strings.Join(args, " "))
+	log.Printf(" (debug) command: %s %s\n", cmd, strings.Join(args, " "))
 
-	fatal(exec.Command("xgo", args...).Run())
+	fatal(exec.Command(cmd, args...).Run())
 	files, e := ioutil.ReadDir(".")
 	fatal(e)
 
@@ -120,22 +114,4 @@ func splitTarget(s string) (string, string) {
 		return parts[0], parts[1]
 	}
 	return s, ""
-}
-
-func flags(b *Build) string {
-	if len(b.Flags) > 0 {
-		buf := bytes.Buffer{}
-		for i, s := range b.Flags {
-			if i > 0 {
-				buf.WriteString(" ")
-			}
-			buf.WriteString(s)
-		}
-
-		flags := buf.String()
-		if len(flags) > 0 {
-			return "-ldflags='" + flags + "'"
-		}
-	}
-	return ""
 }
