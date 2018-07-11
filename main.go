@@ -8,12 +8,6 @@ import (
 )
 
 func main() {
-	if true {
-		s := []string{"one", "two", "three"}
-
-		return
-	}
-
 	start := time.Now()
 	script := bundle.LoadBuildFile()
 
