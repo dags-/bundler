@@ -84,7 +84,7 @@ func Bundle(script *BuildScript, build *Build, target string) (time.Duration, er
 
 	if build.Compress {
 		log.Println(" compressing executable...")
-		e = Compress(b.Artifact(script, build, arch), platform)
+		e = compress(b.Artifact(script, build, arch), platform)
 	}
 
 	return time.Since(start), e

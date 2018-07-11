@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func Compress(path, platform string) error {
+func compress(path, platform string) error {
 	file, err := os.Stat(path)
 	if err != nil {
 		return err
@@ -18,7 +18,7 @@ func Compress(path, platform string) error {
 
 	dir, name := filepath.Split(path)
 	name = strings.TrimSuffix(name, filepath.Ext(name))
-	name = fmt.Sprintf("%s-%s.zip", platform, name)
+	name = fmt.Sprintf("%s-%s.zip", toNormal(platform), name)
 	zipPath := filepath.Join(dir, name)
 
 	out, e := os.Create(zipPath)
