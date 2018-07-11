@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,8 +30,13 @@ func Compress(path, platform string) error {
 	wr := zip.NewWriter(out)
 	defer wr.Close()
 	if file.IsDir() {
-		return filepath.Walk(path, func(path string, file os.FileInfo, err error) error {
-			return writeToZip(wr, path, path, file)
+		return filepath.Walk(path, func(from string, file os.FileInfo, err error) error {
+			to, err := filepath.Rel(dir, from)
+			if err != nil {
+				log.Println(" compress err:", err)
+				return nil
+			}
+			return writeToZip(wr, from, to, file)
 		})
 	} else {
 		return writeToZip(wr, path, file.Name(), file)

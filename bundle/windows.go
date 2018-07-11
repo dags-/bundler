@@ -61,12 +61,9 @@ func (w *windows) WriteManifest(b *BuildScript, p *Build, arch string) error {
 		ManifestPath: "",
 	}
 
-	f, e := os.Open("versioninfo.json")
+	f, e := os.Create("versioninfo.json")
 	if e != nil {
-		f, e = os.Create("versioninfo.json")
-		if e != nil {
-			return e
-		}
+		return e
 	}
 	defer f.Close()
 
