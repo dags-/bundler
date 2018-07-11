@@ -28,13 +28,6 @@ func Setup(build *BuildScript) {
 	}
 }
 
-func Generate(build *Build) {
-	log.Println(" executing generate commands...")
-	for _, c := range build.Generate {
-		cmd(c)
-	}
-}
-
 func Bundle(script *BuildScript, build *Build, target string) (time.Duration, error) {
 	platform, arch := splitTarget(target)
 	if platform == "" || arch == "" {
@@ -57,6 +50,11 @@ func Bundle(script *BuildScript, build *Build, target string) (time.Duration, er
 	e = b.WriteIcon(script, build, arch)
 	if e != nil {
 		log.Println(e)
+	}
+
+	log.Println(" executing generate commands...")
+	for _, c := range build.Generate {
+		cmd(c)
 	}
 
 	log.Println(" compiling executable...")

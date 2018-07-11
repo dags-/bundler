@@ -17,7 +17,6 @@ func main() {
 	log.Println("Running builds")
 	for target, build := range script.Targets {
 		log.Printf("Target: %s\n", target)
-		bundle.Generate(build)
 		t, e := bundle.Bundle(script, build, target)
 		if e != nil {
 			log.Println(" build error:", e)
