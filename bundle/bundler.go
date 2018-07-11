@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -20,10 +21,25 @@ type Builder interface {
 	WriteIcon(build *BuildScript, platform *Build, arch string) error
 }
 
-func Setup(build *BuildScript) {
+func Setup(script *BuildScript) {
 	log.Println(" executing setup commands...")
-	for _, c := range build.Setup {
+	for _, c := range script.Setup {
 		cmd(c)
+	}
+
+	if script.Icon != "" {
+		log.Println(" generating icons...")
+		src, e := loadImage(script.Icon)
+		if e != nil {
+			log.Println(" icon error:", e)
+			return
+		}
+		if path, e := writeIcon(convertIco, src, filepath.Join(script.Output, "icon.ico")); e == nil {
+			script.winIcon = path
+		}
+		if path, e := writeIcon(convertIcns, src, filepath.Join(script.Output, "icon.icns")); e == nil {
+			script.macIcon = path
+		}
 	}
 }
 
@@ -38,17 +54,21 @@ func Bundle(script *BuildScript, build *Build, target string) (time.Duration, er
 		return time.Duration(0), e
 	}
 
-	start := time.Now()
-	log.Println(" writing manifest...")
-	e = b.WriteManifest(script, build, arch)
-	if e != nil {
-		return time.Duration(0), e
+	if build.Icon == "" {
+		build.Icon = icon(script, platform)
 	}
 
 	log.Println(" writing icon...")
 	e = b.WriteIcon(script, build, arch)
 	if e != nil {
 		log.Println(e)
+	}
+
+	start := time.Now()
+	log.Println(" writing manifest...")
+	e = b.WriteManifest(script, build, arch)
+	if e != nil {
+		return time.Duration(0), e
 	}
 
 	log.Println(" executing generate commands...")
@@ -63,7 +83,7 @@ func Bundle(script *BuildScript, build *Build, target string) (time.Duration, er
 	}
 
 	if build.Compress {
-		log.Println(" compressing executable")
+		log.Println(" compressing executable...")
 		e = Compress(b.Artifact(script, build, arch), platform)
 	}
 

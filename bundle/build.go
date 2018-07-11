@@ -9,9 +9,12 @@ type BuildScript struct {
 	Name       string            `json:"name"`
 	Version    string            `json:"version"`
 	Identifier string            `json:"identifier"`
+	Icon       string            `json:"icon"`
 	Output     string            `json:"output"`
 	Setup      []string          `json:"setup"`
 	Targets    map[string]*Build `json:"targets"`
+	winIcon    string
+	macIcon    string
 }
 
 type Build struct {
