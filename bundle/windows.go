@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 )
 
 type windows struct{}
@@ -70,22 +68,6 @@ func (w *windows) WriteManifest(b *BuildScript, p *Build, arch string) error {
 	enc := json.NewEncoder(f)
 	enc.SetIndent("", "  ")
 	return enc.Encode(manifest)
-}
-
-func ver(s string) []int {
-	parts := strings.Split(s, ".")
-	ver := make([]int, 4)
-	for i := 0; i < 4; i++ {
-		val := 0
-		if i < len(parts) {
-			j, e := strconv.Atoi(parts[i])
-			if e == nil {
-				val = j
-			}
-		}
-		ver[i] = val
-	}
-	return ver
 }
 
 type VersionInfo struct {

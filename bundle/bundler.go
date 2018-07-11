@@ -109,8 +109,7 @@ func compile(b Builder, script *BuildScript, build *Build, platform, arch string
 	target := fmt.Sprint(platform, "/", arch)
 	cmd, args := compileCmd(build, buildId, target)
 
-	// todo: remove
-	log.Printf(" (debug) command: %s %s\n", cmd, strings.Join(args, " "))
+	log.Printf("  command: %s %s\n", cmd, strings.Join(args, " "))
 
 	e := exec.Command(cmd, args...).Run()
 	fatal(e)

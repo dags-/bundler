@@ -7,13 +7,6 @@ import (
 	"text/template"
 )
 
-type InfoPlist struct {
-	Executable string
-	Version    string
-	Icon       string
-	Identifier string
-}
-
 type darwin struct{}
 
 func (d *darwin) Artifact(b *BuildScript, p *Build, arch string) string {
@@ -22,18 +15,25 @@ func (d *darwin) Artifact(b *BuildScript, p *Build, arch string) string {
 }
 
 func (d *darwin) ExecPath(b *BuildScript, p *Build, arch string) string {
-	return filepath.Join(d.Artifact(b, p, toNormal(arch)), "Contents", "MacOS", b.Name)
+	return filepath.Join(d.Artifact(b, p, arch), "Contents", "MacOS", b.Name)
+}
+
+func (d *darwin) WriteIcon(b *BuildScript, p *Build, arch string) error {
+	_, icon := filepath.Split(p.Icon)
+	path := filepath.Join(d.Artifact(b, p, arch), "Contents", "Resources", icon)
+	return copyFile(p.Icon, path)
 }
 
 func (d *darwin) WriteManifest(b *BuildScript, p *Build, arch string) error {
-	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, toNormal(arch))
-	path := filepath.Join(b.Output, "darwin", name, "Contents", "Info.plist")
+	path := filepath.Join(d.Artifact(b, p, arch), "Contents", "Info.plist")
 	mustFile(path)
 	f, e := os.Create(path)
+
 	if e != nil {
 		return e
 	}
 	defer f.Close()
+
 	_, icon := filepath.Split(p.Icon)
 	return template.Must(template.New("info").Parse(infoPlist)).Execute(f, &InfoPlist{
 		Executable: b.Name,
@@ -43,11 +43,11 @@ func (d *darwin) WriteManifest(b *BuildScript, p *Build, arch string) error {
 	})
 }
 
-func (d *darwin) WriteIcon(b *BuildScript, p *Build, arch string) error {
-	name := fmt.Sprintf("%s-%s-%s.app", b.Name, b.Version, toNormal(arch))
-	_, icon := filepath.Split(p.Icon)
-	path := filepath.Join(b.Output, "darwin", name, "Contents", "Resources", icon)
-	return copyFile(p.Icon, path)
+type InfoPlist struct {
+	Executable string
+	Version    string
+	Icon       string
+	Identifier string
 }
 
 const infoPlist = `<?xml version="1.0" encoding="UTF-8"?>
