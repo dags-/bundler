@@ -1,12 +1,14 @@
 package build
 
 import (
+	"fmt"
 	"os/exec"
 	"runtime"
 	"strings"
 )
 
 func cmd(cmd string) error {
+	fmt.Println("executing command:", cmd)
 	parts := strings.Split(cmd, " ")
 	name := parts[0]
 	args := parts[1:]

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -93,7 +94,10 @@ func compile(b builder, build *Build, platform, arch string) error {
 	cmd, args := compileCmd(build, buildId, platform, arch)
 	log.Printf("compile command: %s %s\n", cmd, strings.Join(args, " "))
 
-	if e := exec.Command(cmd, args...).Run(); e != nil {
+	c := exec.Command(cmd, args...)
+	c.Stdout = os.Stdout
+
+	if e := c.Run(); e != nil {
 		return e
 	}
 

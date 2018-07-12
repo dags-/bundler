@@ -1,11 +1,11 @@
 package build
 
 import (
-	"html/template"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"text/template"
 )
 
 func fatal(e error) {

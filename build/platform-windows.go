@@ -31,6 +31,8 @@ func (w *windows) init(script *Script, build *Build, arch string) {
 
 func (w *windows) preCompile() error {
 	log.Println("writing version-info...")
+
+	mustFile("versioninfo.json")
 	f, e := os.Create("versioninfo.json")
 	if e != nil {
 		return e
