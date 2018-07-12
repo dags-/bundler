@@ -2,11 +2,13 @@ package build
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 type linux struct {
@@ -78,11 +80,32 @@ func (l *linux) postCompile() error {
 	dir, imgTool := filepath.Split(tool)
 	_, appDir := filepath.Split(l.appDirPath)
 
-	c := exec.Command(imgTool, appDir)
+	c := exec.Command("./"+imgTool, appDir)
 	c.Dir = dir
 
 	if e := c.Run(); e != nil {
 		return e
+	}
+
+	files, e := ioutil.ReadDir(dir)
+	if e != nil {
+		return e
+	}
+
+	for _, f := range files {
+		dir, name := filepath.Split(f.Name())
+		if name == imgTool || name == appDir {
+			continue
+		}
+		if strings.Contains(name, "x86_64") {
+			path := filepath.Join(dir, strings.Replace(name, "x86_64", l.arch, 1))
+			os.Rename(f.Name(), path)
+			continue
+		}
+		if strings.Contains(name, "i686") {
+			path := filepath.Join(dir, strings.Replace(name, "i686", l.arch, 1))
+			os.Rename(f.Name(), path)
+		}
 	}
 
 	return nil
