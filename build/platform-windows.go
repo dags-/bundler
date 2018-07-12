@@ -1,31 +1,57 @@
-package bundle
+package build
 
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
 
-type windows struct{}
-
-func (w *windows) Artifact(b *BuildScript, p *Build, arch string) string {
-	name := fmt.Sprintf("%s-%s-%s.exe", b.Name, b.Version, toNormal(arch))
-	return filepath.Join(b.Output, "windows", name)
+type windows struct {
+	*Build
+	*BuildScript
+	exePath string
 }
 
-func (w *windows) ExecPath(b *BuildScript, p *Build, arch string) string {
-	return w.Artifact(b, p, arch)
+func (w *windows) artifact() string {
+	return w.exePath
 }
 
-func (w *windows) WriteIcon(b *BuildScript, p *Build, arch string) error {
+func (w *windows) executable() string {
+	return w.exePath
+}
+
+func (w *windows) init(script *BuildScript, build *Build, arch string) {
+	name := fmt.Sprintf("%s-%s-%s.exe", script.Name, script.Version, arch)
+	w.Build = build
+	w.BuildScript = script
+	w.exePath = filepath.Join(script.Output, "windows", name)
+}
+
+func (w *windows) preCompile() error {
+	log.Println("writing version-info...")
+	f, e := os.Create("versioninfo.json")
+	if e != nil {
+		return e
+	}
+	defer f.Close()
+
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	return enc.Encode(manifest(w))
+}
+
+func (w *windows) postCompile() error {
+	log.Println("cleaning up...")
+	os.Remove("resource.syso")
+	os.Remove("versioninfo.json")
 	return nil
 }
 
-func (w *windows) WriteManifest(b *BuildScript, p *Build, arch string) error {
-	version := ver(b.Version)
-
-	manifest := &VersionInfo{
+func manifest(w *windows) *VersionInfo {
+	version := splitVersion(w.Version)
+	return &VersionInfo{
 		FixedFileInfo: FixedVersionInfo{
 			FileVersion: Version{
 				Major: version[0],
@@ -46,8 +72,8 @@ func (w *windows) WriteManifest(b *BuildScript, p *Build, arch string) error {
 			FileSubType:   "00",
 		},
 		StringFileInfo: StringFileInfo{
-			ProductName:    b.Name,
-			ProductVersion: b.Version,
+			ProductName:    w.Name,
+			ProductVersion: w.Version,
 		},
 		VarFileInfo: VarFileInfo{
 			Translation: Translation{
@@ -55,19 +81,9 @@ func (w *windows) WriteManifest(b *BuildScript, p *Build, arch string) error {
 				CharsetID: "04B0",
 			},
 		},
-		IconPath:     p.Icon,
+		IconPath:     w.Build.Icon,
 		ManifestPath: "",
 	}
-
-	f, e := os.Create("versioninfo.json")
-	if e != nil {
-		return e
-	}
-	defer f.Close()
-
-	enc := json.NewEncoder(f)
-	enc.SetIndent("", "  ")
-	return enc.Encode(manifest)
 }
 
 type VersionInfo struct {

@@ -1,6 +1,7 @@
-package bundle
+package build
 
 import (
+	"html/template"
 	"io"
 	"os"
 	"path/filepath"
@@ -60,4 +61,15 @@ func copyFile(from, to string) error {
 	}
 
 	return nil
+}
+
+func applyTempl(text, path string, i interface{}) error {
+	mustFile(path)
+	o, e := os.Create(path)
+	if e != nil {
+		return e
+	}
+	defer o.Close()
+	t := template.Must(template.New("template").Parse(text))
+	return t.Execute(o, i)
 }

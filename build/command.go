@@ -1,7 +1,8 @@
-package bundle
+package build
 
 import (
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -12,12 +13,26 @@ func cmd(cmd string) error {
 	return exec.Command(name, args...).Run()
 }
 
-func compileCmd(b *Build, buildId, target string) (cmd string, args []string) {
+func compileCmd(build *Build, buildId, platform, arch string) (cmd string, args []string) {
+	if runtime.GOOS == platform {
+		return nativeCompile(build, buildId, platform+"/"+arch)
+	}
+	return crossCompile(build, buildId, platform+"/"+arch)
+}
+
+func crossCompile(b *Build, buildId, target string) (cmd string, args []string) {
 	args = addArg(args, "-targets", target)
 	args = addArg(args, "-out", buildId)
 	args = addArg(args, "-ldflags", b.Flags...)
 	args = append(args, ".")
 	return "xgo", args
+}
+
+func nativeCompile(b *Build, buildId, target string) (cmd string, args []string) {
+	args = append(args, "build")
+	args = addArg(args, "-o", buildId)
+	args = addArg(args, "-ldflags", b.Flags...)
+	return "go", args
 }
 
 func addArg(a []string, name string, val ...string) []string {

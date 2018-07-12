@@ -1,4 +1,4 @@
-package bundle
+package build
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ver(s string) []int {
+func splitVersion(s string) []int {
 	parts := strings.Split(s, ".")
 	version := make([]int, 4)
 

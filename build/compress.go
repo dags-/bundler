@@ -1,4 +1,4 @@
-package bundle
+package build
 
 import (
 	"archive/zip"
@@ -16,9 +16,10 @@ func compress(path, platform string) error {
 		return err
 	}
 
+	platform = toNormal(platform)
 	dir, name := filepath.Split(path)
 	name = strings.TrimSuffix(name, filepath.Ext(name))
-	name = fmt.Sprintf("%s-%s.zip", toNormal(platform), name)
+	name = fmt.Sprintf("%s-%s.zip", platform, name)
 	zipPath := filepath.Join(dir, name)
 
 	out, e := os.Create(zipPath)
@@ -33,7 +34,7 @@ func compress(path, platform string) error {
 		return filepath.Walk(path, func(from string, file os.FileInfo, err error) error {
 			to, err := filepath.Rel(dir, from)
 			if err != nil {
-				log.Println(" compress err:", err)
+				log.Println("compress error:", err)
 				return nil
 			}
 			return writeToZip(wr, from, to, file)
