@@ -18,6 +18,8 @@ type builder interface {
 
 	postCompile() error
 
+	compress() error
+
 	artifact() string
 
 	executable() string
@@ -64,8 +66,8 @@ func Run(script *Script, build *Build, target string) (time.Duration, error) {
 	}
 
 	if build.Compress {
-		log.Println("ARCHIVE")
-		if e := compress(b.artifact(), platform); e != nil {
+		log.Println("COMPRESS")
+		if e := b.compress(); e != nil {
 			return time.Duration(0), e
 		}
 	}

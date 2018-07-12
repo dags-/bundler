@@ -49,6 +49,10 @@ func (w *windows) postCompile() error {
 	return nil
 }
 
+func (w *windows) compress() error {
+	return compress(w.artifact(), "windows")
+}
+
 func (w *windows) manifest() interface{} {
 	version := splitVersion(w.Version)
 	return &VersionInfo{

@@ -99,6 +99,10 @@ func (l *linux) postCompile() error {
 	return errors.New("could not find app-image")
 }
 
+func (l *linux) compress() error {
+	return compress(l.artifact(), "linux")
+}
+
 func (l *linux) getImageTool() (string, error) {
 	name := fmt.Sprintf("/appimagetool-%s.AppImage", l.arch)
 	path := filepath.Join(l.Output, name)

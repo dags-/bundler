@@ -60,6 +60,10 @@ func (d *darwin) postCompile() error {
 	return nil
 }
 
+func (d *darwin) compress() error {
+	return compress(d.artifact(), "darwin")
+}
+
 func (d *darwin) manifest() interface{} {
 	return &InfoPlist{
 		Executable: d.Name,
