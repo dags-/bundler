@@ -3,6 +3,7 @@ package build
 import (
 	"html/template"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 )
@@ -61,6 +62,24 @@ func copyFile(from, to string) error {
 	}
 
 	return nil
+}
+
+func download(url, path string) (*os.File, error) {
+	r, e := http.Get(url)
+	if e != nil {
+		return nil, e
+	}
+	defer r.Body.Close()
+
+	mustFile(path)
+	o, e := os.Create(path)
+	if e != nil {
+		return nil, e
+	}
+	defer o.Close()
+
+	_, e = io.Copy(o, r.Body)
+	return o, e
 }
 
 func applyTempl(text, path string, i interface{}) error {

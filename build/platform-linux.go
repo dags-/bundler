@@ -2,17 +2,17 @@ package build
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 )
 
 type linux struct {
 	*Build
 	*Script
+	arch       string
 	appDirPath string
 	appImgPath string
 	exePath    string
@@ -39,6 +39,7 @@ func (l *linux) init(script *Script, build *Build, arch string) {
 	name := fmt.Sprintf("%s-%s-%s", script.Name, script.Version, arch)
 	l.Build = build
 	l.Script = script
+	l.arch = arch
 	l.appDirPath = filepath.Join(script.Output, "linux", name+".AppDir")
 	l.appImgPath = filepath.Join(script.Output, "linux", name+".AppImage")
 	l.exePath = filepath.Join(l.appDirPath, "AppRun")
@@ -64,43 +65,57 @@ func (l *linux) preCompile() error {
 }
 
 func (l *linux) postCompile() error {
+	if runtime.GOOS != "linux" {
+		return nil
+	}
+
 	log.Println("packaging appimage...")
 	tool, e := l.getImageTool()
 	if e != nil {
 		return e
 	}
-	if e := exec.Command(tool, l.appDirPath).Run(); e != nil {
+
+	dir, imgTool := filepath.Split(tool)
+	_, appDir := filepath.Split(l.appDirPath)
+
+	c := exec.Command(imgTool, appDir)
+	c.Dir = dir
+
+	if e := c.Run(); e != nil {
 		return e
 	}
+
 	return nil
 }
 
 func (l *linux) getImageTool() (string, error) {
-	path := filepath.Join(l.Output, "linux", "appimagetool-x86_64.AppImage")
+	name := fmt.Sprintf("appimagetool-%s.AppImage", l.arch)
+	path := filepath.Join(l.Output, "linux", name)
 	if exists(path) {
 		return path, nil
 	}
 
-	r, e := http.Get("https://github.com/AppImage/AppImageKit/releases/download/10/appimagetool-x86_64.AppImage")
+	r, e := getLatestRelease("AppImage", "AppImageKit")
 	if e != nil {
 		return "", e
 	}
-	defer r.Body.Close()
 
-	mustFile(path)
-	f, e := os.Create(path)
+	asset := "appimagetool-i686.AppImage"
+	if toNormal(l.arch) == "x64" {
+		asset = "appimagetool-x86_64.AppImage"
+	}
+
+	a, e := r.findAsset(asset)
 	if e != nil {
 		return "", e
 	}
-	defer f.Close()
 
-	if _, e = io.Copy(f, r.Body); e != nil {
+	f, e := download(a.Download, path)
+	if e != nil {
 		return "", e
 	}
 
-	f.Chmod(os.ModePerm)
-
-	return path, nil
+	return path, f.Chmod(os.ModePerm)
 }
 
 func (l *linux) manifest() interface{} {
