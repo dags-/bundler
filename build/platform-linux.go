@@ -2,7 +2,10 @@ package build
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 )
@@ -60,6 +63,44 @@ func (l *linux) preCompile() error {
 	return nil
 }
 
+func (l *linux) postCompile() error {
+	log.Println("packaging appimage...")
+	tool, e := l.getImageTool()
+	if e != nil {
+		return e
+	}
+	if e := exec.Command(tool, l.appDirPath).Run(); e != nil {
+		return e
+	}
+	return nil
+}
+
+func (l *linux) getImageTool() (string, error) {
+	path := filepath.Join(l.Output, "linux", "appimagetool-x86_64.AppImage")
+	if exists(path) {
+		return path, nil
+	}
+
+	r, e := http.Get("https://github.com/AppImage/AppImageKit/releases/download/10/appimagetool-x86_64.AppImage")
+	if e != nil {
+		return "", e
+	}
+	defer r.Body.Close()
+
+	mustFile(path)
+	f, e := os.Create(path)
+	if e != nil {
+		return "", e
+	}
+	defer f.Close()
+
+	if _, e = io.Copy(f, r.Body); e != nil {
+		return "", e
+	}
+
+	return path, nil
+}
+
 func (l *linux) manifest() interface{} {
 	return &Desktop{
 		Name:       l.Name,
@@ -67,14 +108,6 @@ func (l *linux) manifest() interface{} {
 		Executable: "AppRun",
 		Categories: l.MetaData["categories"],
 	}
-}
-
-func (l *linux) postCompile() error {
-	log.Println("packaging appimage...")
-	if e := exec.Command("appimagetool-x86_64.AppImage", l.appDirPath).Run(); e != nil {
-		return e
-	}
-	return nil
 }
 
 const desktop = `[Desktop Entry]
