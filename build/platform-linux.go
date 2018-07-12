@@ -8,7 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type linux struct {
@@ -71,49 +72,36 @@ func (l *linux) postCompile() error {
 		return nil
 	}
 
-	log.Println("packaging appimage...")
+	log.Println("packaging app-image...")
 	tool, e := l.getImageTool()
 	if e != nil {
 		return e
 	}
 
-	dir, imgTool := filepath.Split(tool)
-	_, appDir := filepath.Split(l.appDirPath)
-
-	c := exec.Command("./"+imgTool, appDir)
-	c.Dir = dir
-
+	c := exec.Command(tool, l.appDirPath)
 	if e := c.Run(); e != nil {
 		return e
 	}
 
-	files, e := ioutil.ReadDir(dir)
+	files, e := ioutil.ReadDir(".")
 	if e != nil {
 		return e
 	}
 
 	for _, f := range files {
-		dir, name := filepath.Split(f.Name())
-		if name == imgTool || name == appDir {
-			continue
-		}
-		if strings.Contains(name, "x86_64") {
-			path := filepath.Join(dir, strings.Replace(name, "x86_64", l.arch, 1))
-			os.Rename(f.Name(), path)
-			continue
-		}
-		if strings.Contains(name, "i686") {
-			path := filepath.Join(dir, strings.Replace(name, "i686", l.arch, 1))
-			os.Rename(f.Name(), path)
+		if filepath.Ext(f.Name()) == ".AppImage" {
+			moveFile(f.Name(), l.appImgPath)
+			os.RemoveAll(l.appDirPath)
+			return nil
 		}
 	}
 
-	return nil
+	return errors.New("could not find app-image")
 }
 
 func (l *linux) getImageTool() (string, error) {
-	name := fmt.Sprintf("appimagetool-%s.AppImage", l.arch)
-	path := filepath.Join(l.Output, "linux", name)
+	name := fmt.Sprintf("/appimagetool-%s.AppImage", l.arch)
+	path := filepath.Join(l.Output, name)
 	if exists(path) {
 		return path, nil
 	}
