@@ -12,7 +12,7 @@ import (
 )
 
 type builder interface {
-	init(script *BuildScript, build *Build, arch string)
+	init(script *Script, build *Build, arch string)
 
 	preCompile() error
 
@@ -23,7 +23,7 @@ type builder interface {
 	executable() string
 }
 
-func Run(script *BuildScript, build *Build, target string) (time.Duration, error) {
+func Run(script *Script, build *Build, target string) (time.Duration, error) {
 	parts := strings.Split(target, "/")
 	if len(parts) != 2 {
 		return time.Duration(0), errors.New("invalid target")

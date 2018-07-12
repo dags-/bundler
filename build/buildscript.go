@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-type BuildScript struct {
+type Script struct {
 	Name       string            `json:"name"`
 	Version    string            `json:"version"`
 	Identifier string            `json:"identifier"`
@@ -20,13 +20,14 @@ type BuildScript struct {
 }
 
 type Build struct {
-	Icon     string   `json:"icon"`
-	Compress bool     `json:"compress"`
-	Generate []string `json:"generate"`
-	Flags    []string `json:"flags"`
+	Icon     string            `json:"icon"`
+	Compress bool              `json:"compress"`
+	Generate []string          `json:"generate"`
+	Flags    []string          `json:"flags"`
+	MetaData map[string]string `json:"meta"`
 }
 
-func Setup(script *BuildScript) {
+func Setup(script *Script) {
 	log.Println("executing setup commands...")
 	for _, c := range script.Setup {
 		cmd(c)
@@ -48,8 +49,8 @@ func Setup(script *BuildScript) {
 	}
 }
 
-func LoadBuildFile() *BuildScript {
-	var build BuildScript
+func LoadBuildFile() *Script {
+	var build Script
 
 	d, e := ioutil.ReadFile("build.json")
 	fatal(e)

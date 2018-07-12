@@ -10,7 +10,7 @@ import (
 
 type windows struct {
 	*Build
-	*BuildScript
+	*Script
 	exePath string
 }
 
@@ -22,10 +22,10 @@ func (w *windows) executable() string {
 	return w.exePath
 }
 
-func (w *windows) init(script *BuildScript, build *Build, arch string) {
+func (w *windows) init(script *Script, build *Build, arch string) {
 	name := fmt.Sprintf("%s-%s-%s.exe", script.Name, script.Version, arch)
 	w.Build = build
-	w.BuildScript = script
+	w.Script = script
 	w.exePath = filepath.Join(script.Output, "windows", name)
 }
 
@@ -39,7 +39,7 @@ func (w *windows) preCompile() error {
 
 	enc := json.NewEncoder(f)
 	enc.SetIndent("", "  ")
-	return enc.Encode(manifest(w))
+	return enc.Encode(w.manifest())
 }
 
 func (w *windows) postCompile() error {
@@ -49,7 +49,7 @@ func (w *windows) postCompile() error {
 	return nil
 }
 
-func manifest(w *windows) *VersionInfo {
+func (w *windows) manifest() interface{} {
 	version := splitVersion(w.Version)
 	return &VersionInfo{
 		FixedFileInfo: FixedVersionInfo{

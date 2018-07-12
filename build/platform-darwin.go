@@ -8,7 +8,7 @@ import (
 
 type darwin struct {
 	*Build
-	*BuildScript
+	*Script
 	appDir   string
 	exePath  string
 	infoPath string
@@ -30,10 +30,10 @@ func (d *darwin) executable() string {
 	return d.exePath
 }
 
-func (d *darwin) init(script *BuildScript, build *Build, arch string) {
+func (d *darwin) init(script *Script, build *Build, arch string) {
 	name := fmt.Sprintf("%s-%s-%s.app", script.Name, script.Version, arch)
 	d.Build = build
-	d.BuildScript = script
+	d.Script = script
 	d.appDir = filepath.Join(script.Output, "darwin", name)
 	d.exePath = filepath.Join(d.appDir, "Contents", "MacOS", script.Name)
 	d.infoPath = filepath.Join(d.appDir, "Contents", "Info.plist")
@@ -50,7 +50,7 @@ func (d *darwin) preCompile() error {
 	}
 
 	log.Println("writing info.plist...")
-	if e := applyTempl(infoPlist, d.infoPath, plist(d)); e != nil {
+	if e := applyTempl(infoPlist, d.infoPath, d.manifest()); e != nil {
 		return e
 	}
 	return nil
@@ -60,7 +60,7 @@ func (d *darwin) postCompile() error {
 	return nil
 }
 
-func plist(d *darwin) *InfoPlist {
+func (d *darwin) manifest() interface{} {
 	return &InfoPlist{
 		Executable: d.Name,
 		Version:    d.Version,

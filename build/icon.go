@@ -11,7 +11,7 @@ import (
 
 type converter func(io.WriteCloser, image.Image) error
 
-func icon(script *BuildScript, platform string) string {
+func icon(script *Script, platform string) string {
 	switch platform {
 	case "darwin":
 		return script.macIcon

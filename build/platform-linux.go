@@ -9,7 +9,7 @@ import (
 
 type linux struct {
 	*Build
-	*BuildScript
+	*Script
 	appDirPath string
 	appImgPath string
 	exePath    string
@@ -32,10 +32,10 @@ func (l *linux) executable() string {
 	return l.exePath
 }
 
-func (l *linux) init(script *BuildScript, build *Build, arch string) {
+func (l *linux) init(script *Script, build *Build, arch string) {
 	name := fmt.Sprintf("%s-%s-%s", script.Name, script.Version, arch)
 	l.Build = build
-	l.BuildScript = script
+	l.Script = script
 	l.appDirPath = filepath.Join(script.Output, "linux", name+".AppDir")
 	l.appImgPath = filepath.Join(script.Output, "linux", name+".AppImage")
 	l.exePath = filepath.Join(l.appDirPath, "AppRun")
@@ -53,12 +53,20 @@ func (l *linux) preCompile() error {
 	}
 
 	log.Println("writing .desktop...")
-	desk := &Desktop{Name: l.Name, Icon: l.Name + ".png", Executable: "AppRun", Categories: "Games"}
-	if e := applyTempl(desktop, l.maniPath, desk); e != nil {
+	if e := applyTempl(desktop, l.maniPath, l.manifest()); e != nil {
 		return e
 	}
 
 	return nil
+}
+
+func (l *linux) manifest() interface{} {
+	return &Desktop{
+		Name:       l.Name,
+		Icon:       l.Name + ".png",
+		Executable: "AppRun",
+		Categories: l.MetaData["categories"],
+	}
 }
 
 func (l *linux) postCompile() error {
