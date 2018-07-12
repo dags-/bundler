@@ -3,7 +3,7 @@ package build
 import (
 	"fmt"
 	"os/exec"
-	//"runtime"
+	"runtime"
 	"strings"
 )
 
@@ -16,9 +16,9 @@ func cmd(cmd string) error {
 }
 
 func compileCmd(build *Build, buildId, platform, arch string) (cmd string, args []string) {
-	//if runtime.GOOS == platform {
-	//	return nativeCompile(build, buildId, platform+"/"+arch)
-	//}
+	if runtime.GOOS == platform {
+		return nativeCompile(build, buildId, platform+"/"+arch)
+	}
 	return crossCompile(build, buildId, platform+"/"+arch)
 }
 
