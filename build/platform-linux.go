@@ -98,13 +98,15 @@ func (l *linux) getImageTool() (string, error) {
 		return "", e
 	}
 
+	f.Chmod(os.ModePerm)
+
 	return path, nil
 }
 
 func (l *linux) manifest() interface{} {
 	return &Desktop{
 		Name:       l.Name,
-		Icon:       l.Name + ".png",
+		Icon:       l.Name,
 		Executable: "AppRun",
 		Categories: l.MetaData["categories"],
 	}
