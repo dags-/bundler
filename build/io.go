@@ -76,7 +76,6 @@ func download(url, path string) (*os.File, error) {
 	if e != nil {
 		return nil, e
 	}
-	defer o.Close()
 
 	_, e = io.Copy(o, r.Body)
 	return o, e

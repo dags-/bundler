@@ -114,6 +114,7 @@ func (l *linux) getImageTool() (string, error) {
 	if e != nil {
 		return "", e
 	}
+	defer f.Close()
 
 	return path, f.Chmod(os.ModePerm)
 }
