@@ -2,8 +2,10 @@ package build
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"text/template"
 )
@@ -12,6 +14,32 @@ func fatal(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func WorkDir() string {
+	if len(os.Args) < 2 {
+		return "."
+	}
+
+	p := os.Args[1]
+	defer log.Println("found work dir:", p)
+
+	if exists(p) {
+		return p
+	}
+
+	p = filepath.Join(os.Getenv("GOPATH"), "src", p)
+	if exists(p) {
+		return p
+	}
+
+	log.Println("go getting project:", p)
+	e := exec.Command("go", "get", "-u", p).Run()
+	if e == nil && exists(p) {
+		return p
+	}
+
+	panic("invalid target directory: " + p)
 }
 
 func exists(path string) bool {
@@ -81,7 +109,7 @@ func download(url, path string) (*os.File, error) {
 	return o, e
 }
 
-func applyTempl(text, path string, i interface{}) error {
+func applyTemplate(text, path string, i interface{}) error {
 	mustFile(path)
 	o, e := os.Create(path)
 	if e != nil {

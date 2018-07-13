@@ -28,13 +28,13 @@ type Build struct {
 }
 
 func Setup(script *Script) {
-	log.Println("executing setup commands...")
+	log.Println("executing setup commands")
 	for _, c := range script.Setup {
 		cmd(c)
 	}
 
 	if script.Icon != "" {
-		log.Println("generating icons...")
+		log.Println("generating icons")
 		src, e := loadImage(script.Icon)
 		if e != nil {
 			log.Println("icon error:", e)

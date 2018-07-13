@@ -30,7 +30,7 @@ func (w *windows) init(script *Script, build *Build, arch string) {
 }
 
 func (w *windows) preCompile() error {
-	log.Println("writing version-info...")
+	log.Println("writing version-info")
 
 	mustFile("versioninfo.json")
 	f, e := os.Create("versioninfo.json")
@@ -45,14 +45,17 @@ func (w *windows) preCompile() error {
 }
 
 func (w *windows) postCompile() error {
-	log.Println("cleaning up...")
-	os.Remove("resource.syso")
-	os.Remove("versioninfo.json")
 	return nil
 }
 
 func (w *windows) compress() error {
 	return compress(w.artifact(), "windows")
+}
+
+func (w *windows) clean() {
+	log.Println("cleaning up")
+	os.Remove("resource.syso")
+	os.Remove("versioninfo.json")
 }
 
 func (w *windows) manifest() interface{} {

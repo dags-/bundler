@@ -15,15 +15,17 @@ import (
 type builder interface {
 	init(script *Script, build *Build, arch string)
 
+	artifact() string
+
+	executable() string
+
 	preCompile() error
 
 	postCompile() error
 
 	compress() error
 
-	artifact() string
-
-	executable() string
+	clean()
 }
 
 func Run(script *Script, build *Build, target string) (time.Duration, error) {
@@ -37,37 +39,38 @@ func Run(script *Script, build *Build, target string) (time.Duration, error) {
 	if e != nil {
 		return time.Duration(0), e
 	}
+	defer b.clean()
 
 	start := time.Now()
 	if build.Icon == "" {
 		build.Icon = icon(script, platform)
 	}
 
-	log.Println("INIT")
+	log.Println("# INIT")
 	b.init(script, build, toNormal(arch))
 
-	log.Println("PRE-COMPILE")
+	log.Println("# PRE-COMPILE")
 	if e := b.preCompile(); e != nil {
 		return time.Duration(0), e
 	}
 
-	log.Println("GENERATE")
+	log.Println("# GENERATE")
 	for _, c := range build.Generate {
 		cmd(c)
 	}
 
-	log.Println("COMPILE")
+	log.Println("# COMPILE")
 	if e := compile(b, build, platform, arch); e != nil {
 		return time.Duration(0), e
 	}
 
-	log.Println("POST-COMPILE")
+	log.Println("# POST-COMPILE")
 	if e := b.postCompile(); e != nil {
 		return time.Duration(0), e
 	}
 
 	if build.Compress {
-		log.Println("COMPRESS")
+		log.Println("# COMPRESS")
 		if e := b.compress(); e != nil {
 			return time.Duration(0), e
 		}
@@ -90,12 +93,22 @@ func getBuilder(platform string) (builder, error) {
 }
 
 func compile(b builder, build *Build, platform, arch string) error {
+	e := os.Setenv("GOOS", platform)
+	if e != nil {
+		log.Println("set env error:", e)
+	}
+
+	e = os.Setenv("GOARCH", arch)
+	if e != nil {
+		log.Println("set env error:", e)
+	}
+
 	buildId := fmt.Sprint(time.Now().Unix())
 	cmd, args := compileCmd(build, buildId, platform, arch)
 	log.Printf("compile command: %s %s\n", cmd, strings.Join(args, " "))
-
 	c := exec.Command(cmd, args...)
 	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
 
 	if e := c.Run(); e != nil {
 		return e

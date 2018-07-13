@@ -44,13 +44,13 @@ func (d *darwin) preCompile() error {
 	mustFile(d.iconPath)
 	mustFile(d.infoPath)
 
-	log.Println("copying icon...")
+	log.Println("copying icon")
 	if e := copyFile(d.Build.Icon, d.iconPath); e != nil {
 		log.Println("icon error:", e)
 	}
 
-	log.Println("writing info.plist...")
-	if e := applyTempl(infoPlist, d.infoPath, d.manifest()); e != nil {
+	log.Println("writing info.plist")
+	if e := applyTemplate(infoPlist, d.infoPath, d.manifest()); e != nil {
 		return e
 	}
 	return nil
@@ -63,6 +63,8 @@ func (d *darwin) postCompile() error {
 func (d *darwin) compress() error {
 	return compress(d.artifact(), "darwin")
 }
+
+func (d *darwin) clean() {}
 
 func (d *darwin) manifest() interface{} {
 	return &InfoPlist{

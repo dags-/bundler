@@ -54,13 +54,13 @@ func (l *linux) preCompile() error {
 	mustFile(l.iconPath)
 	mustFile(l.maniPath)
 
-	log.Println("writing icon...")
+	log.Println("writing icon")
 	if e := copyFile(l.Build.Icon, l.iconPath); e != nil {
 		log.Println(" icon error:", e)
 	}
 
-	log.Println("writing .desktop...")
-	if e := applyTempl(desktop, l.maniPath, l.manifest()); e != nil {
+	log.Println("writing .desktop")
+	if e := applyTemplate(desktop, l.maniPath, l.manifest()); e != nil {
 		return e
 	}
 
@@ -72,7 +72,7 @@ func (l *linux) postCompile() error {
 		return nil
 	}
 
-	log.Println("packaging app-image...")
+	log.Println("packaging app-image")
 	tool, e := l.getImageTool()
 	if e != nil {
 		return e
@@ -91,7 +91,6 @@ func (l *linux) postCompile() error {
 	for _, f := range files {
 		if filepath.Ext(f.Name()) == ".AppImage" {
 			moveFile(f.Name(), l.appImgPath)
-			os.RemoveAll(l.appDirPath)
 			return nil
 		}
 	}
@@ -101,6 +100,10 @@ func (l *linux) postCompile() error {
 
 func (l *linux) compress() error {
 	return compress(l.artifact(), "linux")
+}
+
+func (l *linux) clean() {
+
 }
 
 func (l *linux) getImageTool() (string, error) {

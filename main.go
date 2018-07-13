@@ -10,17 +10,19 @@ import (
 
 func main() {
 	log.SetPrefix("[build] ")
+	log.Println("SETTING WORK DIR")
+	os.Chdir(build.WorkDir())
 
 	start := time.Now()
 	script := build.LoadBuildFile()
 
-	log.Println("Cleaning")
+	log.Println("CLEANING BUILD DIR")
 	os.RemoveAll(script.Output)
 
-	log.Println("Setting up")
+	log.Println("RUNNING SETUP SCRIPTS")
 	build.Setup(script)
 
-	log.Println("Running builds")
+	log.Println("RUNNING BUILDS")
 	for target, b := range script.Targets {
 		log.SetPrefix("[" + target + "]")
 		log.Printf("building for: %s\n", target)
@@ -29,9 +31,9 @@ func main() {
 			log.Println("build error:", e)
 			continue
 		}
-		log.Printf("build complete: %s (%.3f seconds)\n", target, t.Seconds())
+		log.Printf("build complete: %.3f seconds\n", t.Seconds())
 	}
 
 	log.SetPrefix("[build] ")
-	log.Printf("Build(s) complete in %.3f seconds\n", time.Since(start).Seconds())
+	log.Printf("BUILD(S) COMPLETE: %.3f SECONDS\n", time.Since(start).Seconds())
 }

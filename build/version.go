@@ -1,6 +1,7 @@
 package build
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -25,10 +26,13 @@ func splitVersion(s string) []int {
 	// try retrieve the build number from an environment variable
 	if name, ok := os.LookupEnv("BUNDLE_BUILD_NUM"); ok {
 		if number, ok := os.LookupEnv(name); ok {
+			log.Println("build number:", number)
 			build, e := strconv.Atoi(number)
 			if e != nil {
 				version[3] = build
 			}
+		} else {
+			log.Println("no build number env variable set")
 		}
 	}
 

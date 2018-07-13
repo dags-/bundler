@@ -1,23 +1,26 @@
 package build
 
 import (
-	"fmt"
+	"log"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 )
 
 func cmd(cmd string) error {
-	fmt.Println("executing command:", cmd)
+	log.Println("executing command:", cmd)
 	parts := strings.Split(cmd, " ")
 	name := parts[0]
 	args := parts[1:]
-	return exec.Command(name, args...).Run()
+	c := exec.Command(name, args...)
+	c.Stdout = os.Stdout
+	return c.Run()
 }
 
 func compileCmd(build *Build, buildId, platform, arch string) (cmd string, args []string) {
 	if runtime.GOOS == platform {
-		return nativeCompile(build, buildId, platform+"/"+arch)
+		return nativeCompile(build, buildId)
 	}
 	return crossCompile(build, buildId, platform+"/"+arch)
 }
@@ -30,7 +33,7 @@ func crossCompile(b *Build, buildId, target string) (cmd string, args []string) 
 	return "xgo", args
 }
 
-func nativeCompile(b *Build, buildId, target string) (cmd string, args []string) {
+func nativeCompile(b *Build, buildId string) (cmd string, args []string) {
 	args = append(args, "build")
 	args = addArg(args, "-o", buildId)
 	args = addArg(args, "-ldflags", b.Flags...)
