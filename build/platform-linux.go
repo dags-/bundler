@@ -2,14 +2,12 @@ package build
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-
-	"github.com/pkg/errors"
+	"strings"
 )
 
 type linux struct {
@@ -40,14 +38,15 @@ func (l *linux) executable() string {
 
 func (l *linux) init(script *Script, build *Build, arch string) {
 	name := fmt.Sprintf("%s-%s-%s", script.Name, script.Version, arch)
+	localName := strings.ToLower(script.Name)
 	l.Build = build
 	l.Script = script
 	l.arch = arch
 	l.appDirPath = filepath.Join(script.Output, "linux", name+".AppDir")
 	l.appImgPath = filepath.Join(script.Output, "linux", name+".AppImage")
 	l.exePath = filepath.Join(l.appDirPath, "AppRun")
-	l.iconPath = filepath.Join(l.appDirPath, script.Name+".png")
-	l.maniPath = filepath.Join(l.appDirPath, script.Name+".desktop")
+	l.iconPath = filepath.Join(l.appDirPath, localName+".png")
+	l.maniPath = filepath.Join(l.appDirPath, localName+".desktop")
 }
 
 func (l *linux) preCompile() error {
@@ -78,24 +77,7 @@ func (l *linux) postCompile() error {
 		return e
 	}
 
-	c := exec.Command(tool, l.appDirPath)
-	if e := c.Run(); e != nil {
-		return e
-	}
-
-	files, e := ioutil.ReadDir(".")
-	if e != nil {
-		return e
-	}
-
-	for _, f := range files {
-		if filepath.Ext(f.Name()) == ".AppImage" {
-			moveFile(f.Name(), l.appImgPath)
-			return nil
-		}
-	}
-
-	return errors.New("could not find app-image")
+	return exec.Command(tool, l.appDirPath, l.appImgPath).Run()
 }
 
 func (l *linux) compress() error {
@@ -103,7 +85,7 @@ func (l *linux) compress() error {
 }
 
 func (l *linux) clean() {
-
+	os.RemoveAll(l.appDirPath)
 }
 
 func (l *linux) getImageTool() (string, error) {
@@ -140,7 +122,7 @@ func (l *linux) getImageTool() (string, error) {
 func (l *linux) manifest() interface{} {
 	return &Desktop{
 		Name:       l.Name,
-		Icon:       l.Name,
+		Icon:       strings.ToLower(l.Name),
 		Executable: "AppRun",
 		Categories: l.MetaData["categories"],
 	}
