@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"time"
@@ -9,6 +10,9 @@ import (
 )
 
 func main() {
+	native := flag.Bool("native", false, "Only build native targets")
+	flag.Parse()
+
 	log.SetPrefix("[build] ")
 	log.Println("SETTING WORK DIR")
 	os.Chdir(build.WorkDir())
@@ -24,6 +28,10 @@ func main() {
 
 	log.Println("RUNNING BUILDS")
 	for target, b := range script.Targets {
+		if *native && !build.Native(target) {
+			log.Println("skipping non-native target:", target)
+			continue
+		}
 		log.SetPrefix("[" + target + "]")
 		log.Printf("building for: %s\n", target)
 		t, e := build.Run(script, b, target)

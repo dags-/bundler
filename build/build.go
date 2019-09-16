@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
@@ -26,6 +27,14 @@ type builder interface {
 	compress() error
 
 	clean()
+}
+
+func Native(target string) bool {
+	parts := strings.Split(target, "/")
+	if len(parts) != 2 {
+		return false
+	}
+	return parts[0] == runtime.GOOS
 }
 
 func Run(script *Script, build *Build, target string) (time.Duration, error) {

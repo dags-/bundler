@@ -1,6 +1,7 @@
 package build
 
 import (
+	"flag"
 	"io"
 	"log"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"text/template"
 )
 
+var wd = flag.String("workdir", ".", "Set the workdir")
+
 func fatal(e error) {
 	if e != nil {
 		panic(e)
@@ -17,29 +20,29 @@ func fatal(e error) {
 }
 
 func WorkDir() string {
-	if len(os.Args) < 2 {
+	if *wd == "." {
 		return "."
 	}
 
-	p := os.Args[1]
-	defer log.Println("found work dir:", p)
+	path := *wd
+	defer log.Println("found work dir:", path)
 
-	if exists(p) {
-		return p
+	if exists(path) {
+		return path
 	}
 
-	p = filepath.Join(os.Getenv("GOPATH"), "src", p)
-	if exists(p) {
-		return p
+	path = filepath.Join(os.Getenv("GOPATH"), "src", path)
+	if exists(path) {
+		return path
 	}
 
-	log.Println("go getting project:", p)
-	e := exec.Command("go", "get", "-u", p).Run()
-	if e == nil && exists(p) {
-		return p
+	log.Println("go getting project:", path)
+	e := exec.Command("go", "get", "-u", path).Run()
+	if e == nil && exists(path) {
+		return path
 	}
 
-	panic("invalid target directory: " + p)
+	panic("invalid target directory: " + path)
 }
 
 func exists(path string) bool {
