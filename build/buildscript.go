@@ -14,17 +14,19 @@ type Script struct {
 	Icon       string            `json:"icon"`
 	Output     string            `json:"output"`
 	Setup      []string          `json:"setup"`
+	GoVersion  string            `json:"go_version"`
 	Targets    map[string]*Build `json:"targets"`
 	winIcon    string
 	macIcon    string
 }
 
 type Build struct {
-	Icon     string            `json:"icon"`
-	Compress bool              `json:"compress"`
-	Generate []string          `json:"generate"`
-	Flags    []string          `json:"flags"`
-	MetaData map[string]string `json:"meta"`
+	Icon      string            `json:"icon"`
+	Compress  bool              `json:"compress"`
+	Generate  []string          `json:"generate"`
+	Flags     []string          `json:"flags"`
+	MetaData  map[string]string `json:"meta"`
+	goVersion string
 }
 
 func Setup(script *Script) {

@@ -32,6 +32,7 @@ func main() {
 			log.Println("skipping non-native target:", target)
 			continue
 		}
+
 		log.SetPrefix("[" + target + "]")
 		log.Printf("building for: %s\n", target)
 		t, e := build.Run(script, b, target)
@@ -39,6 +40,7 @@ func main() {
 			log.Println("build error:", e)
 			continue
 		}
+
 		log.Printf("build complete: %.3f seconds\n", t.Seconds())
 	}
 

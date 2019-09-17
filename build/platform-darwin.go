@@ -31,10 +31,10 @@ func (d *darwin) executable() string {
 }
 
 func (d *darwin) init(script *Script, build *Build, arch string) {
-	name := fmt.Sprintf("%s-%s-%s.app", script.Name, script.Version, arch)
+	version := fmt.Sprintf("%s-%s", script.Version, arch)
 	d.Build = build
 	d.Script = script
-	d.appDir = filepath.Join(script.Output, "darwin", name)
+	d.appDir = filepath.Join(script.Output, "darwin", version, script.Name)
 	d.exePath = filepath.Join(d.appDir, "Contents", "MacOS", script.Name)
 	d.infoPath = filepath.Join(d.appDir, "Contents", "Info.plist")
 	d.iconPath = filepath.Join(d.appDir, "Contents", "Resources", "icon.icns")

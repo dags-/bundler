@@ -37,13 +37,13 @@ func (l *linux) executable() string {
 }
 
 func (l *linux) init(script *Script, build *Build, arch string) {
-	name := fmt.Sprintf("%s-%s-%s", script.Name, script.Version, arch)
+	version := fmt.Sprintf("%s-%s", script.Version, arch)
 	localName := strings.ToLower(script.Name)
 	l.Build = build
 	l.Script = script
 	l.arch = arch
-	l.appDirPath = filepath.Join(script.Output, "linux", name+".AppDir")
-	l.appImgPath = filepath.Join(script.Output, "linux", name+".AppImage")
+	l.appDirPath = filepath.Join(script.Output, "linux", version, script.Name+".AppDir")
+	l.appImgPath = filepath.Join(script.Output, "linux", version, script.Name+".AppImage")
 	l.exePath = filepath.Join(l.appDirPath, "AppRun")
 	l.iconPath = filepath.Join(l.appDirPath, localName+".png")
 	l.maniPath = filepath.Join(l.appDirPath, localName+".desktop")

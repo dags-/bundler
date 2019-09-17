@@ -69,6 +69,7 @@ func Run(script *Script, build *Build, target string) (time.Duration, error) {
 	}
 
 	log.Println("# COMPILE")
+	build.goVersion = script.GoVersion
 	if e := compile(b, build, platform, arch); e != nil {
 		return time.Duration(0), e
 	}

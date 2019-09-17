@@ -23,10 +23,10 @@ func (w *windows) executable() string {
 }
 
 func (w *windows) init(script *Script, build *Build, arch string) {
-	name := fmt.Sprintf("%s-%s-%s.exe", script.Name, script.Version, arch)
+	version := fmt.Sprintf("%s-%s", script.Version, arch)
 	w.Build = build
 	w.Script = script
-	w.exePath = filepath.Join(script.Output, "windows", name)
+	w.exePath = filepath.Join(script.Output, "windows", version, script.Name+".exe")
 }
 
 func (w *windows) preCompile() error {

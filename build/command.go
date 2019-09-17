@@ -26,6 +26,9 @@ func compileCmd(build *Build, buildId, platform, arch string) (cmd string, args 
 }
 
 func crossCompile(b *Build, buildId, target string) (cmd string, args []string) {
+	if b.goVersion != "" {
+		args = addArg(args, "-go", b.goVersion)
+	}
 	args = addArg(args, "-targets", target)
 	args = addArg(args, "-out", buildId)
 	args = addArg(args, "-ldflags", b.Flags...)
