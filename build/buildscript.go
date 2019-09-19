@@ -23,7 +23,7 @@ type Script struct {
 type Build struct {
 	Icon      string            `json:"icon"`
 	Compress  bool              `json:"compress"`
-	Generate  []string          `json:"generateInfo"`
+	Generate  []string          `json:"generate"`
 	Flags     []string          `json:"flags"`
 	MetaData  map[string]string `json:"meta"`
 	goVersion string
