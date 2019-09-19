@@ -34,7 +34,7 @@ func (d *darwin) init(script *Script, build *Build, arch string) {
 	version := fmt.Sprintf("%s-%s", script.Version, arch)
 	d.Build = build
 	d.Script = script
-	d.appDir = filepath.Join(script.Output, "darwin", version, script.Name)
+	d.appDir = filepath.Join(script.Output, "darwin", version, script.Name + ".app")
 	d.exePath = filepath.Join(d.appDir, "Contents", "MacOS", script.Name)
 	d.infoPath = filepath.Join(d.appDir, "Contents", "Info.plist")
 	d.iconPath = filepath.Join(d.appDir, "Contents", "Resources", "icon.icns")
