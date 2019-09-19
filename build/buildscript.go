@@ -23,7 +23,7 @@ type Script struct {
 type Build struct {
 	Icon      string            `json:"icon"`
 	Compress  bool              `json:"compress"`
-	Generate  []string          `json:"generate"`
+	Generate  []string          `json:"generateInfo"`
 	Flags     []string          `json:"flags"`
 	MetaData  map[string]string `json:"meta"`
 	goVersion string
@@ -48,6 +48,12 @@ func Setup(script *Script) {
 		if path, e := writeIcon(convertIcns, src, filepath.Join(script.Output, "icon.icns")); e == nil {
 			script.macIcon = path
 		}
+	}
+
+	log.Println("generating metainfo")
+	e := generateInfo(script.Name, script.Version)
+	if e != nil {
+		log.Println("failed to generate metainfo/metainfo.go", e)
 	}
 }
 
